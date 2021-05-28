@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block head %}
+  <style>
+    table, th, td {
+      border: 1px solid black;
+      text-align: center;
+    }
+  </style>
+  <script src="javascripts/clients.js"></script>
+{% endblock %}
+
+{% block body %}
+<div style="text-align:center;">
+  <h2 class="bg-primary" style="background-color: green;"><b>Client list</b></h2>
+
+  <table style="font-size:large; margin-left:auto; margin-right:auto; width:50%; min-width: 600px;" id="tb_client">
+  </table>
+  <br />
+  <p id="last_refresh"></p>
+  <button id="btn1" onclick="request_clients();" class="btn btn-success btn-lg"><b>Refresh</b></button><br /><br />
+  <button id="btnhome" onclick="window.location.href='/'" class="btn btn-info btn-sm"><b>Return to index</b></button>
+
+</div>
+{% endblock %}

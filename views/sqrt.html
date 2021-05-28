@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block head %}
+  <script>
+    // yet another post function use jQuery
+    let calculate = function(){
+      $.post(
+        '/sqrt/' + $('#anumber').val(),
+        function(data){
+          $('#result').val(data.result);
+        }
+      );
+    }
+    $(document).ready(function() {
+        $('#anumber').on("input", () => {
+          calculate();
+        });
+    });
+  </script>
+{% endblock %}
+
+{% block body %}
+<div  style="text-align:center;">
+  <h2 class="bg-primary" style="background-color: green;"><b>SQRT calculate</b></h2>
+
+  <table style="font-size:large; margin-left:auto; margin-right:auto;">
+    <tr>
+      <td><b class="text-primary" style="text-align:right;">Please input a number</b></td>
+      <td><input type="number" id="anumber"></td>
+    </tr>
+    <tr>
+      <td><b class="text-primary" style="text-align:right;">Result</b></td>
+      <td><input type="text" id="result" readonly></td>
+    </tr>
+  </table>
+  <br />
+  <button onclick="calculate()" class="btn btn-success btn-md"><b>calculate!</b></button> <br/> <br/>
+
+  <button id="btnhome" onclick="window.location.href='/'" class="btn btn-info btn-sm"><b>Return to Index</b></button>
+
+</div>
+{% endblock %}

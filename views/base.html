@@ -1,0 +1,11 @@
+<html>
+  <head>
+    <title>{{ title }}</title>
+    {% include "partialviews/head.html" %}
+    {% block head %} {% endblock %}
+  </head>
+  <body class="container" class="bg-warning" style="font-family:sans-serif;">
+    {% include "partialviews/navigator.html" %}
+    {% block body %} {% endblock %}
+  </body>
+</html>
