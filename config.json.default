@@ -1,6 +1,10 @@
 {
+    "server": {
+        "port": 8000
+    },
     "remote": {
-        "address": "",
-        "token": ""
+        "gpio": "",
+        "camera": "",
+        "mongodb": ""
     }
 }

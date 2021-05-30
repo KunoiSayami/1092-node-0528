@@ -1,40 +1,102 @@
 'use strict';
-// Post function using ajax
-let request_clients = function() {
-	$.ajax({
-		url:"/clients",
-		method: "POST",
-		data: {},
-		datatype: "json",
-		success: function(data){
-			let table_val = '<tr><th>client id</th><th>client name</th></tr>';
-			if (data.status == 200) {
-				data.result.forEach(element => {
-					table_val += `<tr><td>${element.uuid}</td><td>${element.hostname}</td></tr>`;
-				});
-			}
-            // Store fetched data to local storage
-			localStorage.setItem('client_table', JSON.stringify({timestamp: Math.trunc(Date.now() / 1000), data: table_val}));
+if (window.plugin === undefined) {
+	window.plugin = function() {};
+}
+window.plugin.pi_stream = function() {};
+window.plugin.pi_stream.websocket = null;
+window.plugin.pi_stream.ws = function() {};
 
-			$('#tb_client').html(table_val);
-            $('#last_refresh').text(Date());
-		}
-	});
+const default_location = localStorage.getItem('server') || 'ws://127.0.0.1:8080/data';
+
+let sendMessage = function (message) {
+	if (window.plugin.pi_stream.websocket === null)
+		return ;
+	window.plugin.pi_stream.websocket.send(message);
 }
 
-// Fast load data, only call when document load
-let render_table = function() {
-	let data = JSON.parse(localStorage.getItem('client_table')) || {timestamp: 0};
-	if (Math.trunc(Date.now() / 1000) - data.timestamp > 120) {
-        request_clients();
-    } else {
-        $('#tb_client').html(data.data);
-        $('#last_refresh').text(new Date(data.timestamp * 1000));
-    }
+let logger = function() {};
+
+logger.debug = (text) => {
+	console.debug(text);
+}
+logger.warning = (text) => {
+	console.warn(text);
+}
+logger.error = (text) => {
+	console.error(text);
+}
+logger.info = (text) => {
+	console.info(text);
 }
 
-$(document).ready(function() {
-    render_table();
+window.plugin.pi_stream.ws.onOpen = function (_evt) {
+	logger.info('[WS] Connected');
+	const image = document.getElementById('stream_pic');
+	image.style.display = 'unset';
+}
+
+// TODO: use client base64 instead of server send base64
+window.plugin.pi_stream.ws.onMessage = function (evt) {
+	//logger.info('[WS] Got data');
+
+	const image = document.getElementById('stream_pic');
+	image.src = 'data:image/jpeg;base64,'+ evt.data;
+}
+
+window.plugin.pi_stream.ws.onError = function (evt) {
+	logger.error('[WS] Error => ' + evt.data);
+	alert('Websocket got error, please check console to get more information');
+	try {
+		window.plugin.pi_stream.ws.websocket.close();
+	} catch (e) {}
+	window.plugin.pi_stream.ws.websocket = null;
+}
+
+window.plugin.pi_stream.ws.onClose = function (_evt) {
+	logger.info('[WS] Disconnected');
+	window.plugin.pi_stream.ws.websocket = null;
+}
+
+function create_websocket_connect(url) {
+	if (window.plugin.pi_stream.websocket !== null) {
+		console.error('Please disconnect websocket first');
+		return ;
+	}
+	window.plugin.pi_stream.websocket = new WebSocket(url);
+	window.plugin.pi_stream.websocket.onopen = window.plugin.pi_stream.ws.onOpen;
+	window.plugin.pi_stream.websocket.onclose = window.plugin.pi_stream.ws.onClose;
+	window.plugin.pi_stream.websocket.onmessage = window.plugin.pi_stream.ws.onMessage;
+	window.plugin.pi_stream.websocket.onerror = window.plugin.pi_stream.ws.onError;
+}
+
+function connect() {
+	const url = document.getElementById('websocket_url').value;
+	create_websocket_connect(url);
+	document.getElementById('a_connect').style.display = 'none';
+	document.getElementById('a_disconnect').style.display = 'unset';
+	localStorage.setItem('server', url);
+}
+
+function disconnect() {
+	if (window.plugin.pi_stream.websocket === null) {
+		console.error('Please connect websocket first');
+		return ;
+	}
+	sendMessage('close');
+	try {
+		window.plugin.pi_stream.websocket.close();
+	} catch (e) {
+		console.error(e);
+
+	}
+
+	const image = document.getElementById('stream_pic');
+	image.style.display = 'none';
+	document.getElementById('a_connect').style.display = 'unset';
+	document.getElementById('a_disconnect').style.display = 'none';
+	window.plugin.pi_stream.websocket = null;
+}
+
+document.addEventListener("DOMContentLoaded", function(_event) {
+	document.getElementById('websocket_url').value = default_location;
 });
-
-//TODO: fresh after some interval

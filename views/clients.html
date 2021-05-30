@@ -13,12 +13,13 @@
 <div style="text-align:center;">
   <h2 class="bg-primary" style="background-color: green;"><b>Client list</b></h2>
 
-  <table style="font-size:large; margin-left:auto; margin-right:auto; width:50%; min-width: 600px;" id="tb_client">
-  </table>
+  <label for="websocket_url">Url: </label><input id="websocket_url" width="50%">
   <br />
-  <p id="last_refresh"></p>
-  <button id="btn1" onclick="request_clients();" class="btn btn-success btn-lg"><b>Refresh</b></button><br /><br />
-  <button id="btnhome" onclick="window.location.href='/'" class="btn btn-info btn-sm"><b>Return to index</b></button>
+  <a id="a_connect" onclick="connect();">connect</a>
+  <a id="a_disconnect" onclick="disconnect();" style="display: none;">disconnect</a>
+
+  <br />
+  <img id="stream_pic" alt="stream" style="display: none;" />
 
 </div>
 {% endblock %}
