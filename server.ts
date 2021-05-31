@@ -19,11 +19,27 @@
  */
 import path from 'path';
 import app from './app';
+import httpProxy from 'http-proxy';
+
 const config = require(path.resolve(process.cwd(), 'config.json'));
-let server = app.listen(config.server.port || process.env.SERVER_PORT || 8000);
+let server = app.listen((config.server || {}).port || process.env.SERVER_PORT || 8000);
+let proxy = httpProxy.createProxy({target: (config.remote.camera).replace('http', 'ws')})
+//let proxy = httpProxy.createProxyMiddleware();
+
+app.get('/data', (req, res) => {
+    console.log("proxying GET request", req.url);
+    proxy.web(req, res, {});
+});
+
+server.on('upgrade', function (req, socket, head) {
+    console.log("proxying upgrade request", req.url);
+    console.log(req);
+    proxy.ws(req, socket, head);
+  });
 
 function stop() {
     server.close();
+    proxy.close();
 }
 
 export default stop;

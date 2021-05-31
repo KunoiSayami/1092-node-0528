@@ -23,7 +23,6 @@ import superagent from 'superagent';
 
 const router = express.Router();
 
-// Load configure file from home path
 const config = require(path.resolve(process.cwd(), 'config.json'));
 const package_config = require(path.resolve(process.cwd(), 'package.json'));
 
