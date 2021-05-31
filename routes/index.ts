@@ -34,7 +34,7 @@ router.get('/', (req, res) => {
 
 // Process route GET /clients
 router.get('/clients', (req, res) => {
-    res.render('clients.html', { title: 'clients' });
+    res.render('clients.html', { title: 'clients', port: (config.server || {}).stream_port || 8001});
     //res.render('index.html');
 });
 

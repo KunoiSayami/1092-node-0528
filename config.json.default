@@ -1,6 +1,7 @@
 {
     "server": {
-        "port": 8000
+        "port": 8000,
+        "stream_port": 8001
     },
     "remote": {
         "gpio": "",

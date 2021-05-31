@@ -19,9 +19,7 @@
   <a onclick="flash_led();">flash</a>&nbsp;
   <br />
 
-  <label for="websocket_url">Url: </label><input id="websocket_url" width="50%">
-  <br />
-  <a id="a_connect" onclick="connect();">connect</a>
+  <a id="a_connect" onclick="connect({{ port }});">connect</a>
   <a id="a_disconnect" onclick="disconnect();" style="display: none;">disconnect</a>
 
   <br />
