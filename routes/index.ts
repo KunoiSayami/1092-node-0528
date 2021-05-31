@@ -43,15 +43,17 @@ router.get('/sqrt', (req, res) => {
     res.render('sqrt.html', { title: 'sqrt' });
 });
 
-
-// Process route POST /clients
-router.post('/clients', async (req, res) => {
+router.post('/light', async (_req, res) => {
     const response = await superagent
-        .post(config.remote.address)
-        // https://stackoverflow.com/a/610415
-        .set('Authorization', `Bearer ${config.remote.token}`)
-        .send({action: 'query_online'});
-    //console.log(response.body);
+        .post(config.remote.gpio + 'light')
+        .send();
+    res.status(response.status).send(response.body);
+});
+
+router.post('/breath', async (_req, res) => {
+    const response = await superagent
+        .post(config.remote.gpio + 'breath')
+        .send();
     res.status(response.status).send(response.body);
 });
 

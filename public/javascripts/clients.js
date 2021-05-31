@@ -6,8 +6,6 @@ window.plugin.pi_stream = function() {};
 window.plugin.pi_stream.websocket = null;
 window.plugin.pi_stream.ws = function() {};
 
-const default_control_location = localStorage.getItem('control_server') || 'http://127.0.0.1:8081/';
-
 let sendMessage = function (message) {
 	if (window.plugin.pi_stream.websocket === null)
 		return ;
@@ -97,18 +95,15 @@ function disconnect() {
 	window.plugin.pi_stream.websocket = null;
 }
 
-document.addEventListener("DOMContentLoaded", function(_event) {
-	document.getElementById('control_url').value = default_control_location;
-});
-
-function save_control_url(url) {
-	localStorage.setItem('control_url', url);
+function flash_led() {
+	$.post('/light')
+	.done(() => {
+		logger.debug('done');
+	});
 }
 
-function flash_led() {
-	const url = document.getElementById('control_url').value;
-	save_control_url(url);
-	$.post(url + '/light')
+function breath_led() {
+	$.post('/breath')
 	.done(() => {
 		logger.debug('done');
 	});
