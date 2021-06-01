@@ -32,9 +32,9 @@ router.get('/', (req, res) => {
     res.render('index.html', {title: 'Index', repo_url: package_config.repository || '', author: package_config.author || ''});
 });
 
-// Process route GET /clients
-router.get('/clients', (req, res) => {
-    res.render('clients.html', { title: 'clients', port: (config.server || {}).stream_port || 8001});
+// Process route GET /control
+router.get('/control', (req, res) => {
+    res.render('control.html', { title: 'control', port: (config.server || {}).stream_port || 8001});
     //res.render('index.html');
 });
 
@@ -43,18 +43,25 @@ router.get('/sqrt', (req, res) => {
     res.render('sqrt.html', { title: 'sqrt' });
 });
 
-router.post('/light', async (_req, res) => {
-    const response = await superagent
-        .post(config.remote.gpio + 'light')
-        .send();
-    res.status(response.status).send(response.body);
+async function request_api_basic(address: string, req, res) {
+    try {
+        const response = await superagent
+            .post(config.remote.gpio + address)
+            .send(JSON.stringify({times: req.body.times || 1}));
+        res.status(response.status).send(response.body);
+    } catch (e) {
+        console.error(e);
+        res.status(400).send(e);
+        return;
+    }
+}
+
+router.post('/light', async (req, res) => {
+    await request_api_basic('light', req, res);
 });
 
-router.post('/breath', async (_req, res) => {
-    const response = await superagent
-        .post(config.remote.gpio + 'breath')
-        .send();
-    res.status(response.status).send(response.body);
+router.post('/breath', async (req, res) => {
+    await request_api_basic('breath', req, res);
 });
 
 // Process route POST /sqrt/:num

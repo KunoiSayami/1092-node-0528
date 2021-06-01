@@ -22,7 +22,10 @@ import app from './app';
 import httpProxy from 'http-proxy';
 
 const config = require(path.resolve(process.cwd(), 'config.json'));
-let server = app.listen((config.server || {}).port || process.env.SERVER_PORT || 8000);
+const server_port = (config.server || {}).port || process.env.SERVER_PORT || 8000;
+let server = app.listen(server_port);
+console.log('Server listening on: ' + server_port);
+
 
 const proxy = httpProxy.createServer({
     target: config.remote.camera,

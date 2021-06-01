@@ -6,13 +6,13 @@
       text-align: center;
     }
   </style>
-  <script src="javascripts/clients.js"></script>
+  <script src="javascripts/control.js"></script>
 {% endblock %}
 
 {% block body %}
 <div style="text-align:center;">
   <h2 class="bg-primary" style="background-color: green;"><b>Camera and remote control</b></h2>
-
+  <label for="function_times">Process times: </label><input id="function_times">
   <a onclick="flash_led();">flash</a>&nbsp;<a onclick="breath_led()">breath</a>
   <a id="a_connect" onclick="connect({{ port }});">connect</a>
   <a id="a_disconnect" onclick="disconnect();" style="display: none;">disconnect</a>

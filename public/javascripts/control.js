@@ -96,15 +96,17 @@ function disconnect() {
 }
 
 function flash_led() {
-	$.post('/light')
-	.done(() => {
-		logger.debug('done');
-	});
+	call_api('/light')
 }
 
 function breath_led() {
-	$.post('/breath')
-	.done(() => {
-		logger.debug('done');
+	call_api('/breath');
+}
+
+function call_api(url) {
+	$.post(url, {times: document.getElementById('function_times').value || 1})
+	.fail((res) => {
+		alert(res.status + ':' + res.statusText);
+		logger.error(res);
 	});
 }
