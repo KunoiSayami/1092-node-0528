@@ -20,6 +20,7 @@
 import express from 'express';
 import path from 'path';
 import superagent from 'superagent';
+import fs from 'fs';
 
 const router = express.Router();
 
@@ -38,11 +39,12 @@ router.get('/control', (req, res) => {
     //res.render('index.html');
 });
 
-// Process route GET /sqrt
-router.get('/sqrt', (req, res) => {
-    res.render('sqrt.html', { title: 'sqrt' });
+// Process route GET /config
+router.get('/config', (req, res) => {
+    res.render('config.html', { title: 'config' });
 });
 
+// Method for request GPIO api
 async function request_api_basic(address: string, req, res) {
     try {
         const response = await superagent
@@ -64,33 +66,32 @@ router.post('/breath', async (req, res) => {
     await request_api_basic('breath', req, res);
 });
 
-// Process route POST /sqrt/:num
-router.post('/sqrt/:num', (req, res) => {
+router.get('/query_camera', async (_req, res) => {
+    const response = await superagent
+        .get(config.remote.camera + 'query')
+        .send();
+    res.status(response.status).send(response.body);
+});
 
-    let num = Number(req.params.num);
+router.get(/\/camera_(en|dis)able/, async (req, res) => {
+    const response = await superagent
+        .get(config.remote.camera + req.url.split('_')[1])
+        .send();
+    res.status(response.status).send(response.body);
+});
 
-    let status = 200;
-    let result = "";
+router.get('/camera_take', async (_req, res) => {
+    const response = await superagent
+        .get(config.remote.camera + 'get_frame')
+        .send();
+    // https://stackabuse.com/encoding-and-decoding-base64-strings-in-node-js
+    let buff = Buffer.from(response.body.frame, 'base64');
+    res.status(response.status).contentType('jepg').send(buff);
+});
 
-    // Check number integrity
-    if (Number.isNaN(num)) {
-        status = 400;
-        result = "Please input a vaild number";
-    }
-    else {
-        try {
-            result = String(Math.sqrt(num));
-        } catch (e) {
-            status = 400;
-            result = e.toString();
-        }
-    }
+// Process route POST /config/:num
+router.post('/config/:num', (req, res) => {
 
-    let response = {status: status, result: result};
-
-    //console.debug(response);
-
-    res.status(status).send(response);
 });
 
 export = router;

@@ -12,10 +12,11 @@
 {% block body %}
 <div style="text-align:center;">
   <h2 class="bg-primary" style="background-color: green;"><b>Camera and remote control</b></h2>
-  <label for="function_times">Process times: </label><input id="function_times">
+  <label for="function_times">Process times:&nbsp;&nbsp;</label><input id="function_times">
   <a onclick="flash_led();">flash</a>&nbsp;<a onclick="breath_led()">breath</a>
-  <a id="a_connect" onclick="connect({{ port }});">connect</a>
-  <a id="a_disconnect" onclick="disconnect();" style="display: none;">disconnect</a>
+  <br />
+  <a id="a_connect" onclick="connect({{ port }});">Connect camera</a>
+  <a id="a_disconnect" onclick="disconnect();" style="display: none;">Disconnect camera</a>
 
   <br />
   <img id="stream_pic" alt="stream" style="display: none;" />

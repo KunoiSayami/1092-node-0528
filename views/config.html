@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block head %}
+  <script src="javascripts/configure.js"></script>
+{% endblock %}
+
+{% block body %}
+<div  style="text-align:center;">
+  <h2 class="bg-primary" style="background-color: green;"><b>Raspberry pi configure</b></h2>
+  Camera status: <span id="camera_status">Loading...</span><br />
+  <a id="set_online" onclick="set_camera(true);">Set online</a><a id="set_offline" onclick="set_camera(false);" style="display: None;">Set offline</a>&nbsp;&nbsp;&nbsp;<a onclick="refresh_status();">Refresh</a>
+  <hr>
+
+</div>
+{% endblock %}
