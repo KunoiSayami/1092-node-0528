@@ -93,9 +93,25 @@ router.get('/camera_take', async (_req, res) => {
 });
 
 interface TemperatureRecord {
-    readonly temperature: number;
-    readonly humidity: number;
+    readonly temperature: string;
+    readonly humidity: string;
     readonly timestamp: Date;
+}
+
+function get_middle_number(arr: Array<number>) {
+    let len = arr.length;
+    if (!len) {
+        return new Error('Array should not empty!');
+    }
+    if (len == 1) {
+        return arr[0];
+    }
+    let midn = Math.trunc(len / 2);
+    let a = arr.sort();
+    if (len & 1) {
+        return a[ midn - 1];
+    }
+    return ((a[midn] + a[midn - 1]) / 2).toFixed(2);
 }
 
 router.get('/query_temperature/:period?', async (req, res) => {
@@ -119,18 +135,35 @@ router.get('/query_temperature/:period?', async (req, res) => {
         await client.connect();
         const database = client.db('temperatureRecords');
         const records = database.collection('records');
-        let arrays;
-        if (! query_day) {
+        let arrays = Array();
+        if (!query_day) {
             arrays = await records.find().sort({_id: -1}).limit(limit).toArray();
+            res.contentType('json').status(200).write(JSON.stringify(arrays.map((element: TemperatureRecord) => {
+                return {temperature: element.temperature, humidity: element.humidity, timestamp: element.timestamp.getTime()}
+            })));
         } else {
-            let day = moment().subtract(1, 'days').toDate();
-            let filter = {timestamp: {$gte: day}};
-            arrays = await records.find(filter).toArray();
+            const day = moment().subtract(1, 'days').toDate();
+            const filter = {timestamp: {$gte: day}};
+            const result = await records.find(filter).toArray();
+            let current_minute = new Date(0);
+            let c_temp = Array(), c_hum = Array();
+            result.forEach((element: TemperatureRecord) => {
+                // TODO: should use more accurate compare
+                if (element.timestamp.getMinutes() !== current_minute.getMinutes()) {
+                    current_minute = element.timestamp;
+                    current_minute.setSeconds(0);
+                    current_minute.setMilliseconds(0);
+                    if (c_temp.length && c_hum.length) {
+                        arrays.push({temperature: get_middle_number(c_temp), humidity: get_middle_number(c_hum), timestamp: current_minute.getTime() / 1000});
+                    }
+                    c_temp = Array(), c_hum = Array();
+                }
+                c_temp.push(parseFloat(element.temperature));
+                c_hum.push(parseFloat(element.humidity));
+            });
+            res.contentType('json').status(200).write(JSON.stringify(arrays));
         }
         //console.log(arrays);
-        res.contentType('json').status(200).write(JSON.stringify(arrays.map((element: TemperatureRecord) => {
-            return {temperature: element.temperature, humidity: element.humidity, timestamp: element.timestamp.getTime()}
-        })));
         res.end();
     }
     finally {
