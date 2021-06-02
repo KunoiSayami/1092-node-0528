@@ -20,6 +20,7 @@
 import path from 'path';
 import app from './app';
 import httpProxy from 'http-proxy';
+import cronObj from './server.cron';
 
 const config = require(path.resolve(process.cwd(), 'config.json'));
 const server_port = (config.server || {}).port || process.env.SERVER_PORT || 8000;
@@ -35,6 +36,7 @@ const proxy = httpProxy.createServer({
 function stop() {
     server.close();
     proxy.close();
+    clearInterval(cronObj);
 }
 
 export default stop;

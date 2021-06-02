@@ -20,12 +20,15 @@
 import express from 'express';
 import path from 'path';
 import superagent from 'superagent';
-import fs from 'fs';
+import mongodb from 'mongodb';
+import moment from 'moment';
 
 const router = express.Router();
 
 const config = require(path.resolve(process.cwd(), 'config.json'));
 const package_config = require(path.resolve(process.cwd(), 'package.json'));
+const db_uri =
+  "mongodb://localhost/temperatureRecords";
 
 
 // Process route GET home page
@@ -88,6 +91,54 @@ router.get('/camera_take', async (_req, res) => {
     let buff = Buffer.from(response.body.frame, 'base64');
     res.status(response.status).contentType('jepg').send(buff);
 });
+
+interface TemperatureRecord {
+    readonly temperature: number;
+    readonly humidity: number;
+    readonly timestamp: Date;
+}
+
+router.get('/query_temperature/:period?', async (req, res) => {
+    let period = req.params['period'];
+    let limit = 1;
+    const num_period = parseInt(period);
+    let query_day = false;
+    if (!isNaN(num_period)) {
+        limit = num_period;
+    } else if (period === 'day') {
+        query_day = true;
+    } else if (period !== undefined) {
+        res.status(400).send(JSON.stringify({status: 400, reason: 'Illegal argument'}));
+        return;
+    }
+    const client = new mongodb.MongoClient(db_uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    try {
+        await client.connect();
+        const database = client.db('temperatureRecords');
+        const records = database.collection('records');
+        let arrays;
+        if (! query_day) {
+            arrays = await records.find().sort({_id: -1}).limit(limit).toArray();
+        } else {
+            let day = moment().subtract(1, 'days').toDate();
+            let filter = {timestamp: {$gte: day}};
+            arrays = await records.find(filter).toArray();
+        }
+        //console.log(arrays);
+        res.contentType('json').status(200).write(JSON.stringify(arrays.map((element: TemperatureRecord) => {
+            return {temperature: element.temperature, humidity: element.humidity, timestamp: element.timestamp.getTime()}
+        })));
+        res.end();
+    }
+    finally {
+        client.close();
+    }
+    res.send();
+});
+
 
 // Process route POST /config/:num
 router.post('/config/:num', (req, res) => {
