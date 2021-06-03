@@ -131,5 +131,14 @@ function call_api(url) {
 }
 
 function take_and_send() {
-
+	localStorage.setItem('email', $('#email_address').val())
+	$.post('/send_mail', {email: $('#email_address').val()})
+		.fail((res) => {
+			alert('Send mail failure');
+			logger.error(res);
+		});
 }
+
+document.addEventListener("DOMContentLoaded", function(_event) {
+    $('#email_address').val(localStorage.getItem('email') || '');
+});

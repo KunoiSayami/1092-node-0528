@@ -22,6 +22,7 @@ import path from 'path';
 import superagent from 'superagent';
 import mongodb from 'mongodb';
 import moment from 'moment';
+import nodemailer from 'nodemailer';
 
 const router = express.Router();
 
@@ -172,10 +173,86 @@ router.get('/query_temperature/:period?', async (req, res) => {
     res.send();
 });
 
+let last_send = 0;
 
-// Process route POST /config/:num
-router.post('/config/:num', (req, res) => {
+function parse_email(email: string) {
+    return email.split('@')[0] + ' <' + email + '>';
+}
 
+function create_transporter_object() {
+    let basic = {
+        service: "gmail",
+        auth: {
+            user: config.smtp.user,
+            pass: config.smtp.password
+        },
+        logger: true,
+        debug: false, // include SMTP traffic in the logs
+        proxy: undefined,
+    };
+
+    if ((config.smtp.proxy || '').length) {
+        basic.proxy = config.smtp.proxy;
+    } else {
+        delete basic.proxy;
+    }
+    
+    let transporter = nodemailer.createTransport(
+        basic,
+        {
+            // default message fields
+
+            // sender info
+            from: parse_email(config.smtp.user),
+        }
+    );
+    return transporter;
+}
+
+// Process route POST /send_mail
+router.post('/send_mail', async (req, res) => {
+    if (req.body.email === undefined) {
+        res.sendStatus(400);
+        return;
+    }
+
+    let transporter = create_transporter_object();
+
+    const result = await superagent
+        .get(config.remote.camera + 'get_frame')
+        .send();
+    let image = result.body.frame;
+
+    let message = {
+        to: parse_email(req.body.email),
+        subject: 'Got frame ' + Date.now(),
+        html: `<p><b>Hello</b> frame: <img src="frame@current"/></p>
+        <p>` + new Date().toString()+ `</p>`,
+        attachments: [
+            {
+                filename: 'image.png',
+                content: Buffer.from(image,'base64'),
+                cid: 'frame@current' // should be as unique as possible
+            }
+        ]
+    }
+
+    transporter.sendMail(message, (error, info) => {
+        if (error) {
+            console.log('Error occurred');
+            console.log(error.message);
+            res.sendStatus(500);
+            return ;
+        }
+        console.log('Message sent successfully!');
+        console.log(nodemailer.getTestMessageUrl(info));
+
+        // only needed when using pooled connections
+        transporter.close();
+        res.status(204);
+    });
+    
+    res.end();
 });
 
 export = router;

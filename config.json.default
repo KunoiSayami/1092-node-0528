@@ -8,4 +8,11 @@
         "camera": "",
         "mongodb": ""
     }
+    "smtp": {
+        "host": "",
+        "port": "",
+        "user": "",
+        "password": "",
+        "proxy": ""
+    }
 }
