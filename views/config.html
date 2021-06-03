@@ -7,9 +7,9 @@
 <div  style="text-align:center;">
   <h2 class="bg-primary" style="background-color: green;"><b>Raspberry pi configure</b></h2>
   Camera status: <span id="camera_status">Loading...</span><br />
-  <a id="set_online" onclick="set_camera(true);">Set online</a><a id="set_offline" onclick="set_camera(false);" style="display: None;">Set offline</a>&nbsp;&nbsp;&nbsp;<a onclick="refresh_status();">Refresh</a>
+  <button id="set_online" onclick="set_camera(true);" class="btn btn-success">Set online</button><button id="set_offline" class="btn btn-danger" onclick="set_camera(false);" style="display: None;">Set offline</button>&nbsp;&nbsp;&nbsp;<button class="btn btn-info" onclick="refresh_status();">Refresh</button>
   <hr>
 
-
+  
 </div>
 {% endblock %}

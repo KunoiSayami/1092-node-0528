@@ -129,3 +129,7 @@ function call_api(url) {
 		logger.error(res);
 	});
 }
+
+function take_and_send() {
+
+}

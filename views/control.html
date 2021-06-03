@@ -12,11 +12,14 @@
 {% block body %}
 <div style="text-align:center;">
   <h2 class="bg-primary" style="background-color: green;"><b>Camera and remote control</b></h2>
-  <label for="function_times">Process times:&nbsp;&nbsp;</label><input id="function_times">
-  <a onclick="flash_led();">flash</a>&nbsp;<a onclick="breath_led()">breath</a>
+  <label for="function_times">Process times:&nbsp;&nbsp;</label><input id="function_times" style="width: 20px;">
+  <button onclick="flash_led();" class="btn btn-info btn-sm">flash</button>&nbsp;
+<button class="btn btn-info btn-sm" onclick="breath_led()">breath</button>
   <br />
-  <a id="a_connect" onclick="connect({{ port }});">Connect camera</a>
-  <a id="a_disconnect" onclick="disconnect();" style="display: none;">Disconnect camera</a>
+  <label for="email_address">Email address: </label><input id="email_address">&nbsp;&nbsp;<button onclick="take_and_send();" type="button" class="btn btn-info btn-sm">Take photo and send mail</button>
+  <br />
+  <button id="a_connect" onclick="connect({{ port }});" class="btn btn-success">Connect camera</button>
+  <button id="a_disconnect" onclick="disconnect();" class="btn btn-danger" style="display: none;">Disconnect camera</button>
 
   <br />
   <img id="stream_pic" alt="stream" style="display: none;" />
