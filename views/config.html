@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block head %}
+  <script src="javascripts/chart.min.js"></script>
   <script src="javascripts/configure.js"></script>
 {% endblock %}
 
@@ -10,6 +11,13 @@
   <button id="set_online" onclick="set_camera(true);" class="btn btn-success">Set online</button><button id="set_offline" class="btn btn-danger" onclick="set_camera(false);" style="display: None;">Set offline</button>&nbsp;&nbsp;&nbsp;<button class="btn btn-info" onclick="refresh_status();">Refresh</button>
   <hr>
 
+  <canvas id="temperature_chart" width="400" height="100" aria-label="temperature" role="img">
+    Your browser is not support
+  </canvas>
+  
+  <canvas id="humidity_chart" width="400" height="100" aria-label="humidity" role="img">
+    Your browser is not support
+  </canvas>
   
 </div>
 {% endblock %}

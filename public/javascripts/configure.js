@@ -43,6 +43,56 @@ function refresh_status() {
         });
 }
 
+function parse_timestamp(timestamp) {
+    return new Date(timestamp).toTimeString().split(' ')[0].substr(0, 5);
+}
+
+function parse_data(res, elem_func, label, color1, color2) {
+    return {
+        labels: res.map((element) => {
+            return parse_timestamp(element.timestamp * 1000);
+        }),
+        datasets: [{
+            label: label,
+            data: res.map((element) => elem_func(element)),
+            borderColor: color1,
+            backgroundColor: color2,
+        }]
+    }
+}
+
+function parse_temperature_chart() {
+    $.get('/query_temperature/day')
+        .done((res) => {
+            const data =
+                parse_data(res, element => {
+                    return {
+                        x: parse_timestamp(element.timestamp * 1000),
+                        y: parseFloat(element.temperature)
+                    };
+                }, 'Temperature', 'rgba(211,47,47,1)', 'rgba(211,47,47,0.5)');
+            const ctx1 = document.getElementById('temperature_chart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'line',
+                data: data,
+            });
+
+            const data2 = parse_data(res, element => {
+                return {
+                    x: parse_timestamp(element.timestamp * 1000),
+                    y: parseFloat(element.humidity)
+                };
+            }, 'Humidity', 'rgba(25,118,210,1)', 'rgba(25,118,210,0.5)')
+
+            const ctx2 = document.getElementById('humidity_chart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'line',
+                data: data2,
+            });
+        });
+}
+
 document.addEventListener("DOMContentLoaded", function(_event) {
     refresh_status();
+    parse_temperature_chart();
 });

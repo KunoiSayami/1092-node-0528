@@ -19,7 +19,7 @@
  */
 import express from 'express';
 import path from 'path';
-import superagent from 'superagent';
+import superagent, { parse } from 'superagent';
 import mongodb from 'mongodb';
 import moment from 'moment';
 import nodemailer from 'nodemailer';
@@ -149,6 +149,12 @@ router.get('/query_temperature/:period?', async (req, res) => {
             let current_minute = new Date(0);
             let c_temp = Array(), c_hum = Array();
             result.forEach((element: TemperatureRecord) => {
+                let temperature = parseFloat(element.temperature);
+                let humidity = parseFloat(element.humidity);
+                if (temperature > 40 || temperature < 20 || humidity > 80 || humidity < 10) {
+                    return
+                }
+
                 // TODO: should use more accurate compare
                 if (element.timestamp.getMinutes() !== current_minute.getMinutes()) {
                     current_minute = element.timestamp;
@@ -187,7 +193,7 @@ function create_transporter_object() {
             pass: config.smtp.password
         },
         logger: true,
-        debug: false, // include SMTP traffic in the logs
+        debug: false,
         proxy: undefined,
     };
 
@@ -200,9 +206,6 @@ function create_transporter_object() {
     let transporter = nodemailer.createTransport(
         basic,
         {
-            // default message fields
-
-            // sender info
             from: parse_email(config.smtp.user),
         }
     );
@@ -216,6 +219,11 @@ router.post('/send_mail', async (req, res) => {
         return;
     }
 
+    if (last_send - new Date().getDate() < 30000) {
+        res.sendStatus(429);
+        return;
+    }
+
     let transporter = create_transporter_object();
 
     const result = await superagent
@@ -226,7 +234,7 @@ router.post('/send_mail', async (req, res) => {
     let message = {
         to: parse_email(req.body.email),
         subject: 'Got frame ' + Date.now(),
-        html: `<p><b>Hello</b> frame: <img src="frame@current"/></p>
+        html: `<p><b>Hello</b> frame: <img src="cid:frame@current"/></p>
         <p>` + new Date().toString()+ `</p>`,
         attachments: [
             {
@@ -236,6 +244,9 @@ router.post('/send_mail', async (req, res) => {
             }
         ]
     }
+
+    // What ever send result, just set it has been sent
+    last_send = new Date().getTime();
 
     transporter.sendMail(message, (error, info) => {
         if (error) {
@@ -247,7 +258,6 @@ router.post('/send_mail', async (req, res) => {
         console.log('Message sent successfully!');
         console.log(nodemailer.getTestMessageUrl(info));
 
-        // only needed when using pooled connections
         transporter.close();
         res.status(204);
     });
