@@ -19,7 +19,7 @@
  */
 import express from 'express';
 import path from 'path';
-import superagent, { parse } from 'superagent';
+import superagent from 'superagent';
 import mongodb from 'mongodb';
 import moment from 'moment';
 import nodemailer from 'nodemailer';
@@ -39,7 +39,7 @@ router.get('/', (req, res) => {
 
 // Process route GET /control
 router.get('/control', (req, res) => {
-    res.render('control.html', { title: 'control', port: (config.server || {}).stream_port || 8001});
+    res.render('control.html', { title: 'Camera', port: (config.server || {}).stream_port || 8001});
     //res.render('index.html');
 });
 
@@ -91,6 +91,16 @@ router.get('/camera_take', async (_req, res) => {
     // https://stackabuse.com/encoding-and-decoding-base64-strings-in-node-js
     let buff = Buffer.from(response.body.frame, 'base64');
     res.status(response.status).contentType('jepg').send(buff);
+});
+
+router.get('/show_temperature', async (_req, res) => {
+    const temp = await superagent
+        .get(config.remote.gpio + 'temperature')
+        .send();
+    const response = await superagent
+        .post(config.remote.gpio + 'number')
+        .send(JSON.stringify({number: Math.trunc(temp.body.temperature)}));
+    res.status(response.status).end();
 });
 
 interface TemperatureRecord {
@@ -219,7 +229,7 @@ router.post('/send_mail', async (req, res) => {
         return;
     }
 
-    if (last_send - new Date().getDate() < 30000) {
+    if ((new Date().getTime() - last_send)< 30000) {
         res.sendStatus(429);
         return;
     }

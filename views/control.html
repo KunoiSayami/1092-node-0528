@@ -14,10 +14,11 @@
   <h2 class="bg-primary" style="background-color: green;"><b>Camera and remote control</b></h2>
   <label for="function_times">Process times:&nbsp;&nbsp;</label><input id="function_times" style="width: 20px;">
   <button onclick="flash_led();" class="btn btn-info btn-sm">flash</button>&nbsp;
-<button class="btn btn-info btn-sm" onclick="breath_led()">breath</button>
+<button class="btn btn-info btn-sm" onclick="breath_led()">breath</button>&nbsp;
   <br />
   <label for="email_address">Email address: </label><input id="email_address">&nbsp;&nbsp;<button onclick="take_and_send();" type="button" class="btn btn-info btn-sm">Take photo and send mail</button>
   <br />
+  <button class="btn btn-info btn-sm" onclick="show_temperature()">Show current temperature</button>
   <button id="a_connect" onclick="connect({{ port }});" class="btn btn-success">Connect camera</button>
   <button id="a_disconnect" onclick="disconnect();" class="btn btn-danger" style="display: none;">Disconnect camera</button>
 

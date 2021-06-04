@@ -122,8 +122,16 @@ function breath_led() {
 	call_api('/breath');
 }
 
+function show_temperature() {
+	$.get('/show_temperature')
+		.fail((res) => {
+			alert(res.status + ':' + res.statusText);
+			logger.error(res);
+		})
+}
+
 function call_api(url) {
-	$.post(url, {times: document.getElementById('function_times').value || 1})
+	$.post(url, {times: $('#function_times').val() || 1})
 	.fail((res) => {
 		alert(res.status + ':' + res.statusText);
 		logger.error(res);
